@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import kotlinx.android.synthetic.main.activity_main.*
@@ -46,6 +47,13 @@ class MainActivity : AppCompatActivity() {
                     download(URL_RETROFIT)
                     custom_button.setButtonState(ButtonState.Loading)
                 }
+                else -> {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.select_file),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }
@@ -53,32 +61,33 @@ class MainActivity : AppCompatActivity() {
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+            custom_button.setButtonState(ButtonState.Completed)
         }
     }
 
-    private fun download(url : String) {
+    private fun download(url: String) {
         val request =
-                DownloadManager.Request(Uri.parse(url))
-                        .setTitle(getString(R.string.app_name))
-                        .setDescription(getString(R.string.app_description))
-                        .setRequiresCharging(false)
-                        .setAllowedOverMetered(true)
-                        .setAllowedOverRoaming(true)
+            DownloadManager.Request(Uri.parse(url))
+                .setTitle(getString(R.string.app_name))
+                .setDescription(getString(R.string.app_description))
+                .setRequiresCharging(false)
+                .setAllowedOverMetered(true)
+                .setAllowedOverRoaming(true)
 
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         downloadID =
-                downloadManager.enqueue(request)// enqueue puts the download request in the queue.
+            downloadManager.enqueue(request)// enqueue puts the download request in the queue.
     }
 
     companion object {
         private const val URL_GLIDE =
-                "https://github.com/bumptech/glide/archieve/master.zip"
+            "https://github.com/bumptech/glide/archieve/master.zip"
 
         private const val URL_LOAD_APP =
-                "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
+            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
 
         private const val URL_RETROFIT =
-                "https://github.com/square/retrofit/archive/master.zip"
+            "https://github.com/square/retrofit/archive/master.zip"
 
         private const val CHANNEL_ID = "channelId"
     }
