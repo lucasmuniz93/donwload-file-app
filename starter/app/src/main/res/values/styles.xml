@@ -17,4 +17,12 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="AppTheme.RadioButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">@dimen/radio_button_padding</item>
+        <item name="android:textSize">@dimen/default_text_size</item>
+    </style>
+
+    <dimen name="radio_button_padding">16dp</dimen>
 </resources>
