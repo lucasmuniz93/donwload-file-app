@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import timber.log.Timber
 
 
 class MainActivity : AppCompatActivity() {
@@ -27,11 +28,25 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+        Timber.plant(Timber.DebugTree())
 
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
         custom_button.setOnClickListener {
-            download()
+            when (radiogroup_options.checkedRadioButtonId) {
+                R.id.radiobutton_glide -> {
+                    download(URL_GLIDE)
+                    custom_button.setButtonState(ButtonState.Loading)
+                }
+                R.id.radiobutton_load_app -> {
+                    download(URL_LOAD_APP)
+                    custom_button.setButtonState(ButtonState.Loading)
+                }
+                R.id.radiobutton_retrofit -> {
+                    download(URL_RETROFIT)
+                    custom_button.setButtonState(ButtonState.Loading)
+                }
+            }
         }
     }
 
@@ -41,23 +56,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun download() {
+    private fun download(url : String) {
         val request =
-            DownloadManager.Request(Uri.parse(URL))
-                .setTitle(getString(R.string.app_name))
-                .setDescription(getString(R.string.app_description))
-                .setRequiresCharging(false)
-                .setAllowedOverMetered(true)
-                .setAllowedOverRoaming(true)
+                DownloadManager.Request(Uri.parse(url))
+                        .setTitle(getString(R.string.app_name))
+                        .setDescription(getString(R.string.app_description))
+                        .setRequiresCharging(false)
+                        .setAllowedOverMetered(true)
+                        .setAllowedOverRoaming(true)
 
         val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         downloadID =
-            downloadManager.enqueue(request)// enqueue puts the download request in the queue.
+                downloadManager.enqueue(request)// enqueue puts the download request in the queue.
     }
 
     companion object {
-        private const val URL =
-            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
+        private const val URL_GLIDE =
+                "https://github.com/bumptech/glide/archieve/master.zip"
+
+        private const val URL_LOAD_APP =
+                "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
+
+        private const val URL_RETROFIT =
+                "https://github.com/square/retrofit/archive/master.zip"
+
         private const val CHANNEL_ID = "channelId"
     }
 
