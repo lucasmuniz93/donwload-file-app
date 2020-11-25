@@ -1,5 +1,7 @@
 package com.udacity
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
@@ -19,11 +21,17 @@ class LoadingButton @JvmOverloads constructor(
     private var widthSize = 0
     private var heightSize = 0
     private var progress = 0
+    private var circleRadius = 50f
+    private val circleHorizontalMargin = 2f
 
     private val loadingRect = Rect()
 
+    // bounds will store the rectangle that will circumscribe the text.
+    private val textBound = Rect()
+
     private var primaryBackgroundColor = context.getColor(R.color.colorPrimary)
     private var primaryDarkBackgroundColor = context.getColor(R.color.colorPrimaryDark)
+    private var circleColor = context.getColor(R.color.colorAccent)
 
     private var textLoading = context.getText(R.string.button_loading).toString()
     private var textDefault = context.getText(R.string.button_download).toString()
@@ -48,6 +56,19 @@ class LoadingButton @JvmOverloads constructor(
                         progress = animatedValue as Int
                         invalidate()
                     }
+                    valueAnimator.addListener(
+                        object : AnimatorListenerAdapter() {
+
+                            override fun onAnimationEnd(animation: Animator?) {
+                                super.onAnimationEnd(animation)
+                                buttonState = ButtonState.Completed
+                            }
+
+                            override fun onAnimationCancel(animation: Animator?) {
+                                super.onAnimationCancel(animation)
+                                progress = 0
+                            }
+                        })
 
                     start()
                 }
@@ -58,6 +79,7 @@ class LoadingButton @JvmOverloads constructor(
             }
         }
         requestLayout()
+        invalidate()
     }
 
     init {
@@ -74,22 +96,42 @@ class LoadingButton @JvmOverloads constructor(
             // Fill the background
             it.drawColor(primaryBackgroundColor)
 
+            // get the text bounds
+            paint.getTextBounds(textToDraw, 0, textToDraw.length, textBound)
 
             if (buttonState == ButtonState.Loading) {
                 paint.color = primaryDarkBackgroundColor
-                loadingRect.set(progress*widthSize/round, 0, widthSize, heightSize)
+                loadingRect.set(progress * widthSize / round, 0, widthSize, heightSize)
                 textToDraw = textLoading
                 it.drawRect(loadingRect, paint)
+
+                // draws the loading circle
+                paint.color = circleColor
+                val loadingCirclePosX =
+                    (widthSize / 2f) + (textBound.width() / 2f) + circleHorizontalMargin
+                val loadingCirclePosY = (heightSize / 2) + ((paint.descent() + paint.ascent()) / 2)
+                var oval = RectF()
+                oval.set(
+                    loadingCirclePosX,
+                    loadingCirclePosY,
+                    loadingCirclePosX + circleRadius,
+                    loadingCirclePosY + circleRadius
+                )
+                it.drawArc(oval, 0f, progress.toFloat(), true, paint)
             } else {
                 textToDraw = textDefault
             }
 
             paint.color = textColor
-            it.drawText(textToDraw, widthSize / 2f, (heightSize / 2) - ((paint.descent() + paint.ascent()) / 2), paint)
-
+            it.drawText(
+                textToDraw,
+                widthSize / 2f,
+                (heightSize / 2) - ((paint.descent() + paint.ascent()) / 2),
+                paint
+            )
+            // Restore the canvas
+            it.restore()
         }
-        requestLayout()
-        invalidate()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
