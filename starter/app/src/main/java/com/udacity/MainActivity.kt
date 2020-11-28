@@ -1,17 +1,17 @@
 package com.udacity
 
 import android.app.DownloadManager
+import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import timber.log.Timber
@@ -20,10 +20,10 @@ import timber.log.Timber
 class MainActivity : AppCompatActivity() {
 
     private var downloadID: Long = 0
+    private var optSelectedStr = ""
 
     private lateinit var notificationManager: NotificationManager
-    private lateinit var pendingIntent: PendingIntent
-    private lateinit var action: NotificationCompat.Action
+    private lateinit var downloadManager: DownloadManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,18 +32,22 @@ class MainActivity : AppCompatActivity() {
         Timber.plant(Timber.DebugTree())
 
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        createChannel(CHANNEL_ID, CHANNEL_NAME)
 
         custom_button.setOnClickListener {
             when (radiogroup_options.checkedRadioButtonId) {
                 R.id.radiobutton_glide -> {
+                    optSelectedStr = getString(R.string.option_glide)
                     download(URL_GLIDE)
                     custom_button.setButtonState(ButtonState.Loading)
                 }
                 R.id.radiobutton_load_app -> {
+                    optSelectedStr = getString(R.string.option_load_app)
                     download(URL_LOAD_APP)
                     custom_button.setButtonState(ButtonState.Loading)
                 }
                 R.id.radiobutton_retrofit -> {
+                    optSelectedStr = getString(R.string.option_retrofit)
                     download(URL_RETROFIT)
                     custom_button.setButtonState(ButtonState.Loading)
                 }
@@ -61,6 +65,37 @@ class MainActivity : AppCompatActivity() {
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+            id.let {
+
+                //Query the download manager about downloads that have been requested.
+                val query = DownloadManager.Query()
+                    .setFilterById(id!!)
+                val cursor = downloadManager.query(query)
+
+                // Get the download status
+                if (cursor.moveToFirst()) {
+                    var status = cursor.getInt(
+                        cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+                    )
+                    var contentStatus = ""
+                    when (status) {
+                        DownloadManager.STATUS_SUCCESSFUL -> {
+                            contentStatus = getString(R.string.download_complete)
+                        }
+                        DownloadManager.STATUS_FAILED -> {
+                            contentStatus = getString(R.string.download_failed)
+                        }
+                    }
+
+                    notificationManager.sendNotification(
+                        applicationContext,
+                        id!!.toInt(),
+                        CHANNEL_ID,
+                        optSelectedStr,
+                        contentStatus
+                    )
+                }
+            }
         }
     }
 
@@ -73,9 +108,20 @@ class MainActivity : AppCompatActivity() {
                 .setAllowedOverMetered(true)
                 .setAllowedOverRoaming(true)
 
-        val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+        downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         downloadID =
             downloadManager.enqueue(request)// enqueue puts the download request in the queue.
+    }
+
+    private fun createChannel(channelId: String, channelName: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+            notificationChannel.description = "Download Finished"
+
+            notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
     }
 
     companion object {
@@ -89,6 +135,7 @@ class MainActivity : AppCompatActivity() {
             "https://github.com/square/retrofit/archive/master.zip"
 
         private const val CHANNEL_ID = "channelId"
+        private const val CHANNEL_NAME = "channelName"
     }
 
 }
