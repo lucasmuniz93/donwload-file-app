@@ -77,22 +77,13 @@ class MainActivity : AppCompatActivity() {
                     var status = cursor.getInt(
                         cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
                     )
-                    var contentStatus = ""
-                    when (status) {
-                        DownloadManager.STATUS_SUCCESSFUL -> {
-                            contentStatus = getString(R.string.download_complete)
-                        }
-                        DownloadManager.STATUS_FAILED -> {
-                            contentStatus = getString(R.string.download_failed)
-                        }
-                    }
 
                     notificationManager.sendNotification(
                         applicationContext,
                         id!!.toInt(),
                         CHANNEL_ID,
                         optSelectedStr,
-                        contentStatus
+                        status
                     )
                 }
             }

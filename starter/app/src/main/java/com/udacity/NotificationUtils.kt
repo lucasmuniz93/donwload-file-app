@@ -1,5 +1,6 @@
 package com.udacity
 
+import android.app.DownloadManager
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
@@ -12,7 +13,7 @@ private val NOTIFICATION_ID = 0
 private lateinit var action: NotificationCompat.Action
 private lateinit var pendingIntent: PendingIntent
 
-const val EXTRA_DOWNLOAD_STATUS= "extra_download_status"
+const val EXTRA_DOWNLOAD_STATUS = "extra_download_status"
 const val EXTRA_DOWNLOAD_FILE_NAME = "extra_download_file_name"
 
 fun NotificationManager.sendNotification(
@@ -20,12 +21,12 @@ fun NotificationManager.sendNotification(
     downloadId: Int,
     channelId: String,
     contentFileName: String,
-    contentStatus: String
+    downloadStatus: Int
 ) {
 
     val contentIntent = Intent(context, DetailActivity::class.java)
     contentIntent.putExtra(EXTRA_DOWNLOAD_FILE_NAME, contentFileName)
-    contentIntent.putExtra(EXTRA_DOWNLOAD_STATUS, contentStatus)
+    contentIntent.putExtra(EXTRA_DOWNLOAD_STATUS, downloadStatus)
     pendingIntent = PendingIntent.getActivity(
         context,
         NOTIFICATION_ID,
@@ -42,8 +43,8 @@ fun NotificationManager.sendNotification(
 
     val builder =
         NotificationCompat.Builder(context, channelId)
-            .setContentTitle(contentFileName)
-            .setContentText(contentStatus)
+            .setContentTitle(context.resources.getString(R.string.notification_title))
+            .setContentText(context.resources.getString(R.string.notification_description))
             .setSmallIcon(R.drawable.ic_baseline_cloud_download_24)
             .setContentIntent(pendingIntent)
             .addAction(action)
