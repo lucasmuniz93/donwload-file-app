@@ -67,6 +67,9 @@ class MainActivity : AppCompatActivity() {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
             id.let {
 
+                // Set the state completed to finish the loading button animation
+                custom_button.setButtonState(ButtonState.Completed)
+
                 //Query the download manager about downloads that have been requested.
                 val query = DownloadManager.Query()
                     .setFilterById(id!!)
@@ -77,6 +80,9 @@ class MainActivity : AppCompatActivity() {
                     var status = cursor.getInt(
                         cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
                     )
+
+                    // Cancels the old notification to always show the last one
+                    notificationManager.cancelNotifications()
 
                     notificationManager.sendNotification(
                         applicationContext,

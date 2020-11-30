@@ -69,7 +69,7 @@ class LoadingButton @JvmOverloads constructor(
                                 progress = 0
                             }
                         })
-
+                    valueAnimator.repeatCount = ValueAnimator.INFINITE
                     start()
                 }
                 paint.color = primaryDarkBackgroundColor
