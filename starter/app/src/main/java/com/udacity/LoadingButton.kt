@@ -35,7 +35,7 @@ class LoadingButton @JvmOverloads constructor(
 
     private var textLoading = context.getText(R.string.button_loading).toString()
     private var textDefault = context.getText(R.string.button_download).toString()
-    private var textColor = Color.WHITE
+    private var textColor = context.getColor(R.color.textColor)
     private var textToDraw = textDefault
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -84,6 +84,34 @@ class LoadingButton @JvmOverloads constructor(
 
     init {
 
+        val typedArray = context.theme.obtainStyledAttributes(
+            attrs,
+            R.styleable.LoadingButton,
+            defStyleAttr,
+            0
+        )
+
+        with(typedArray) {
+            textColor = getColor(
+                R.styleable.LoadingButton_textColor,
+                textColor
+            )
+            primaryBackgroundColor = getColor(
+                R.styleable.LoadingButton_primaryBackgroundColor,
+                primaryBackgroundColor
+            )
+            primaryDarkBackgroundColor = getColor(
+                R.styleable.LoadingButton_colorPrimaryDark,
+                primaryDarkBackgroundColor
+            )
+            circleColor = getColor(
+                R.styleable.LoadingButton_circularProgressColor,
+                circleColor
+            )
+        }
+
+        // TypedArray must be recycled after the use
+        typedArray.recycle()
     }
 
     override fun onDraw(canvas: Canvas?) {

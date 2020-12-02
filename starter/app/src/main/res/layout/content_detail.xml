@@ -52,7 +52,7 @@
         android:layout_margin="24dp"
         android:background="@color/colorAccent"
         android:text="@string/detail_button"
-        android:textColor="@color/white"
+        android:textColor="@color/textColor"
         android:textSize="@dimen/file_stats_text_size"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
