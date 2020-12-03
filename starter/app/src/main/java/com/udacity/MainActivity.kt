@@ -121,6 +121,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        unregisterReceiver(receiver)
+    }
+
     companion object {
         private const val URL_GLIDE =
             "https://github.com/bumptech/glide/archieve/master.zip"
